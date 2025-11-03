@@ -19,7 +19,7 @@
                 <div class="profile-menu" id="profileMenu">
                     <p class="profile-name">Olá, {{ user }}!</p>
                     <a href="#">Meu Perfil</a>
-                    <a href="http://127.0.0.1:8000/admin">Cadastrar Usuário</a>
+                    <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
                     <a href="{% url 'logout' %}">Sair</a>
                 </div>
             </div>
@@ -39,7 +39,6 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Espécie</th>
                 <th>Raça</th>
                 <th>Idade</th>
@@ -49,6 +48,9 @@
         </thead>
         <tbody id="animalList"></tbody>
     </table>
+
+        
+    <script src="{% static 'petguard/animais.js' %}"></script>
 
     <button id="doacoesBtn" onclick="openDoacoesPage()">Doações</button>
 

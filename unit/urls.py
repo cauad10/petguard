@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from petguard import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/animais/', views.listar_animais, name='listar_animais'),
     path('', include('petguard.urls')),
 ]
 
