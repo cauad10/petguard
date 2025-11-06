@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetGuard</title>
+    <link rel="stylesheet" href="{% static 'petguard/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'petguard/index.css' %}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-nome">
+                <img src="{% static 'petguard/petlogobranco.png' %}" class="logo" id="logo">
+            </div>
+            <div class="profile-container">
+                <img src="{% static 'petguard/iconepng.png' %}" alt="Perfil" class="profile-icon" id="profileIcon">
+                <div class="profile-menu" id="profileMenu">
+                    <p class="profile-name">Olá, {{ user }}!</p>
+                    <a href="#">Meu Perfil</a>
+                    <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
+                    <a href="{% url 'logout' %}">Sair</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section>
+        <form id="animalForm">
+            <div class="barra-pesquisa">
+                <input type="text" placeholder="Pesquisar..." name="q" class="campo-pesquisa">
+                <button type="submit" class="botao-pesquisa">Buscar</button>
+                <a href="{% static 'petguard/addAnimal.html' %}" class="addBtn">Adicionar Animal</a>
+            </form>
+        </form>
+    </section>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Espécie</th>
+                <th>Raça</th>
+                <th>Idade</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="animalList"></tbody>
+    </table>
+
+        
+    <script src="{% static 'petguard/animais.js' %}"></script>
+
+    <button id="addAnimalbtn">ADICIONAR</button>
+
+    <script>
+    document.getElementById('addAnimalbtn').addEventListener('click', function() {
+        window.location.href = "{% url 'add_animal' %}";
+    });
+    </script>
+
+    <script>
+        const profileIcon = document.getElementById('profileIcon');
+        const profileMenu = document.getElementById('profileMenu');
+
+        profileIcon.addEventListener('click', () => {
+            profileMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!profileIcon.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.remove('show');
+            }
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            alert("Você saiu da conta!");
+        });
+    </script>
+</body>
+</html>
