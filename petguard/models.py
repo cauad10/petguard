@@ -1,20 +1,20 @@
 from django.db import models
 
-class Animal(models.Model):
-    STATUS_CHOICES = [
-        ('Disponível', 'Disponível'),
-        ('Em tratamento', 'Em tratamento'),
-        ('Adotado', 'Adotado'),
-    ]
-    apelido = models.CharField(max_length=50)
-    especie = models.CharField(max_length=50)
-    raca = models.CharField(max_length=50)
-    idade = models.PositiveIntegerField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Disponível')
-    foto = models.ImageField(upload_to='fotos_animais/', blank=True, null=True)
-    descricao = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class Especie(models.Model):
+    nome = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return f"{self.especie} - {self.raca} (ID {self.id})"
+        return self.nome
+
+
+class Animal(models.Model):
+    apelido = models.CharField(max_length=100, blank=True, null=True)
+    especie = models.ForeignKey(Especie, on_delete=models.CASCADE)
+    raca = models.CharField(max_length=100)
+    anos = models.IntegerField(default=0)
+    meses = models.IntegerField(default=0)
+    status = models.CharField(max_length=50, default="disponivel")
+    observacoes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.apelido or f"Animal {self.id}"

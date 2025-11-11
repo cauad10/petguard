@@ -19,7 +19,9 @@
                 <div class="profile-menu" id="profileMenu">
                     <p class="profile-name">Olá, {{ user }}!</p>
                     <a href="#">Meu Perfil</a>
-                    <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
+                    {% if is_admin %}
+                        <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
+                    {% endif %}
                     <a href="{% url 'logout' %}">Sair</a>
                 </div>
             </div>
@@ -27,18 +29,17 @@
     </header>
 
     <section>
-        <form id="animalForm">
-            <div class="barra-pesquisa">
-                <input type="text" placeholder="Pesquisar..." name="q" class="campo-pesquisa">
-                <button type="submit" class="botao-pesquisa">Buscar</button>
-                <a href="{% static 'petguard/addAnimal.html' %}" class="addBtn">Adicionar Animal</a>
-            </form>
+        <form id="animalForm" class="barra-pesquisa">
+            <input type="text" placeholder="Pesquisar..." name="q" class="campo-pesquisa">
+            <button type="submit" class="botao-pesquisa">Buscar</button>
+            <button type="button" id="addAnimalbtn" class="addBtn">Adicionar</button>
         </form>
     </section>
 
     <table>
         <thead>
             <tr>
+                <th>Apelido</th>
                 <th>Espécie</th>
                 <th>Raça</th>
                 <th>Idade</th>
@@ -46,37 +47,106 @@
                 <th>Ações</th>
             </tr>
         </thead>
-        <tbody id="animalList"></tbody>
+        <tbody>
+            {% for animal in animais %}
+            <tr>
+                <td>{{ animal.apelido }}</td>
+                <td>{{ animal.especie }}</td>
+                <td>{{ animal.raca }}</td>
+                <td>
+                    {% if animal.anos > 0 %}
+                        {{ animal.anos }} ano(s)
+                    {% endif %}
+                    {% if animal.meses > 0 %}
+                        {% if animal.anos > 0 %} e {% endif %}
+                        {{ animal.meses }} mês(es)
+                    {% endif %}
+                    {% if animal.anos == 0 and animal.meses == 0 %}
+                        0 mês(es)
+                    {% endif %}
+                </td>
+                <td>{{ animal.status }}</td>
+                <td>
+                    <a href="{% url 'editar_animal' animal.id %}" class="btn btn-success">Editar</a>
+                    <form action="{% url 'excluir_animal' animal.id %}" method="post" class="delete-form" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger delete-btn">
+                            Excluir
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;">Nenhum animal cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 
-        
     <script src="{% static 'petguard/animais.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <button id="addAnimalbtn">ADICIONAR</button>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // ✅ Faz o botão "Adicionar" voltar a funcionar
+    const addAnimalBtn = document.getElementById("addAnimalbtn");
+    if (addAnimalBtn) {
+        addAnimalBtn.addEventListener("click", function() {
+            window.location.href = "{% url 'add_animal' %}";
+        });
+    }
 
-    <script>
-    document.getElementById('addAnimalbtn').addEventListener('click', function() {
-        window.location.href = "{% url 'add_animal' %}";
+    // ✅ Confirmação de exclusão com SweetAlert
+    document.querySelectorAll(".delete-form .delete-btn").forEach(button => {
+        button.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const form = this.closest("form");
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            Swal.fire({
+                title: "Tem certeza?",
+                text: "Você deseja excluir este animal?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sim, excluir",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(form.action, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": csrfToken,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Excluído!",
+                                text: "O animal foi removido com sucesso.",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire("Erro!", data.error || "Falha ao excluir o animal.", "error");
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire("Erro!", "Não foi possível excluir o animal.", "error");
+                    });
+                }
+            });
+        });
     });
-    </script>
+});
+</script>
 
-    <script>
-        const profileIcon = document.getElementById('profileIcon');
-        const profileMenu = document.getElementById('profileMenu');
-
-        profileIcon.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!profileIcon.contains(event.target) && !profileMenu.contains(event.target)) {
-                profileMenu.classList.remove('show');
-            }
-        });
-
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            alert("Você saiu da conta!");
-        });
-    </script>
 </body>
 </html>

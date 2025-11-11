@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(animais => {
             const corpo = document.getElementById("animalList");
             corpo.innerHTML = "";
+
             animais.forEach(animal => {
                 corpo.innerHTML += `
                     <tr>
@@ -14,7 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>${animal.raca}</td>
                         <td>${animal.idade}</td>
                         <td>${animal.status}</td>
-                        <td><button>Editar</button></td>
+                        <td>
+                            <a href="/add_animal/${animal.id}/">
+                                <button class="btn-editar">Editar</button>
+                            </a>
+                        </td>
                     </tr>
                 `;
             });

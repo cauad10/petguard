@@ -13,8 +13,11 @@
             <img src="{% static 'petguard/petlogo.png' %}" alt="Logo PetGuard">
         </div>
         <p>Entre na sua conta</p>
-        <form method="POST" action="">
+        <form method="POST" action="" id="loginForm">
             {% csrf_token %}
+            {% if error_message %}
+            <div class="error">{{ error_message }}</div>
+            {% endif %}
             <label for="usuario">Usuário:</label>
             <input type="text" id="usuario" name="username" placeholder="Digite seu usuário" required>
             <label for="senha">Senha:</label>
@@ -30,5 +33,43 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    <script>
+        const form = document.getElementById("loginForm");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("usuario").value;
+            const password = document.getElementById("senha").value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const response = await fetch("", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken
+                },
+                body: new URLSearchParams({
+                    username: username,
+                    password: password
+                })
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                let errorDiv = document.querySelector(".error");
+                if (!errorDiv) {
+                    errorDiv = document.createElement("div");
+                    errorDiv.className = "error";
+                    errorDiv.style.color = "red";
+                    errorDiv.style.marginTop = "10px";
+                    form.prepend(errorDiv);
+                }
+                errorDiv.textContent = "Usuário ou senha incorretos.";
+            }
+        });
+    </script>
 </body>
 </html>

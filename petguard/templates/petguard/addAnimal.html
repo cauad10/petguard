@@ -7,89 +7,94 @@
   <title>PetGuard - Cadastro de Animal</title>
   <link rel="stylesheet" href="{% static 'petguard/styles.css' %}">
   <link rel="stylesheet" href="{% static 'petguard/addAnimal.css' %}">
-
 </head>
 <body>
 
-    <header>
-        <div class="header-content">
-            <div class="logo-nome">
-                <img src="{% static 'petguard/petlogobranco.png' %}" class="logo" id="logo">
-            </div>
-            <div class="profile-container">
-            <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Perfil" class="profile-icon" id="profileIcon">
-
-            <div class="profile-menu" id="profileMenu">
-                <p class="profile-name">Olá, {{ user }}!</p>
-                <a href="#">Meu Perfil</a>
-                <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
-                <a href="{% url 'logout' %}">Sair</a>
-            </div>
+  <header>
+    <div class="header-content">
+      <div class="logo-nome">
+        <img src="{% static 'petguard/petlogobranco.png' %}" class="logo" id="logo">
+      </div>
+      <div class="profile-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Perfil" class="profile-icon" id="profileIcon">
+        <div class="profile-menu" id="profileMenu">
+          <p class="profile-name">Olá, {{ user }}!</p>
+          <a href="#">Meu Perfil</a>
+          {% if is_admin %}
+            <a href="http://127.0.0.1:8000/admin/">Cadastrar Usuário</a>
+          {% endif %}
+          <a href="{% url 'logout' %}">Sair</a>
         </div>
-        </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
   <div class="container">
     <div class="card">
-      <div class="animal-info">
-        <div class="animal-foto">
-          <img src="{% static 'petguard/icone-gato.png' %}" alt="Foto do animal">
-        </div>
-
-        <div class="dados">
-          <p><strong>ID:</strong> animal_123456</p>
-
-          <div class="idade">
-            <select>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-              <option>6</option>
-              <option>7</option>
-              <option>8</option>
-              <option>9</option>
-              <option>10</option>
-            </select>
-            <span>ano(s)</span>
-            <select>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-              <option>6</option>
-              <option>7</option>
-              <option>8</option>
-              <option>9</option>
-              <option>10</option>
-              <option>11</option>
-              <option>12</option>
-            </select>
-            <span>mês(es)</span>
+      <form method="POST" action="">
+        {% csrf_token %}
+        <div class="animal-info">
+          <div class="animal-foto">
+            <img src="{% static 'petguard/icone-gato.png' %}" alt="Foto do animal">
           </div>
 
-          <label>Apelido:</label>
-          <input type="text" placeholder="Apelido">
+          <div class="dados">
+            {% if animal %}
+              <p><strong>ID:</strong> {{ animal.id }}</p>
+            {% endif %}
 
-          <label>Espécie:</label>
-          <input type="text" placeholder="Espécie">
+            <div class="idade">
+              <label>Idade:</label>
 
-          <label>Raça:</label>
-          <input type="text" placeholder="Raça">
+              <select name="anos">
+                {% for i in anos %}
+                  <option value="{{ i }}" {% if animal and animal.anos == i %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+              </select>
+              <span>ano(s)</span>
+
+              <select name="meses">
+                {% for i in meses %}
+                  <option value="{{ i }}" {% if animal and animal.meses == i %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+              </select>
+              <span>mês(es)</span>
+            </div>
+
+            <label>Apelido:</label>
+            <input type="text" name="apelido" placeholder="Apelido" value="{{ animal.apelido|default:'' }}">
+
+            <label>Espécie:</label>
+            <select name="especie" required>
+  <option value="">Selecione</option>
+  {% for especie in especies %}
+    <option value="{{ especie.id }}" {% if animal and animal.especie.id == especie.id %}selected{% endif %}>
+      {{ especie.nome }}
+    </option>
+  {% endfor %}
+</select>
+
+
+            <label>Raça:</label>
+            <input type="text" name="raca" placeholder="Raça" value="{{ animal.raca|default:'' }}" required>
+
+            <label>Status:</label>
+            <select name="status" id="status">
+              <option value="disponivel" {% if animal.status == "disponivel" %}selected{% endif %}>Disponível</option>
+              <option value="em_tratamento" {% if animal.status == "em_tratamento" %}selected{% endif %}>Em tratamento</option>
+              <option value="adotado" {% if animal.status == "adotado" %}selected{% endif %}>Adotado</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <label style="margin-top: 20px;">Observações:</label>
-      <textarea placeholder="Digite as observações..."></textarea>
+        <label style="margin-top: 20px;">Observações:</label>
+        <textarea name="observacoes" placeholder="Digite as observações...">{{ animal.observacoes|default:'' }}</textarea>
 
-      <div class="botoes">
-        <a href="{% url 'index' %}">
-  <button class="btn-salvar">Salvar</button>
-        </a>
-
-      </div>
+        <div class="botoes">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <a href="{% url 'index' %}" class="btn-cancelar">Cancelar</a>
+        </div>
+      </form>
     </div>
   </div>
 
