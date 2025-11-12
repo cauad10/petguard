@@ -45,7 +45,6 @@
 
             <div class="idade">
               <label>Idade:</label>
-
               <select name="anos">
                 {% for i in anos %}
                   <option value="{{ i }}" {% if animal and animal.anos == i %}selected{% endif %}>{{ i }}</option>
@@ -65,21 +64,34 @@
             <input type="text" name="apelido" placeholder="Apelido" value="{{ animal.apelido|default:'' }}">
 
             <label>Espécie:</label>
-            <select name="especie" required>
-  <option value="">Selecione</option>
-  {% for especie in especies %}
-    <option value="{{ especie.id }}" {% if animal and animal.especie.id == especie.id %}selected{% endif %}>
-      {{ especie.nome }}
-    </option>
-  {% endfor %}
-</select>
-
+            <select name="especie" id="especieSelect" required>
+              <option value="">Selecione</option>
+              {% for especie in especies %}
+                <option value="{{ especie.id }}" {% if animal and animal.especie.id == especie.id %}selected{% endif %}>
+                  {{ especie.nome }}
+                </option>
+              {% endfor %}
+            </select>
 
             <label>Raça:</label>
-            <input type="text" name="raca" placeholder="Raça" value="{{ animal.raca|default:'' }}" required>
+            <select name="raca" id="racaSelect" onchange="handleRacaChange(this)" required>
+              <option value="">Selecione uma espécie primeiro...</option>
+              {% if animal and racas %}
+                {% for raca in racas %}
+                  <option value="{{ raca.id }}" {% if animal and animal.raca.id == raca.id %}selected{% endif %}>
+                    {{ raca.nome }}
+                  </option>
+                {% endfor %}
+              {% endif %}
+              <option value="nova">➕ Adicionar nova raça</option>
+            </select>
+
+            <div id="novaRacaDiv" style="display: none; margin-top: 10px;">
+              <input type="text" id="novaRacaInput" name="nova_raca" placeholder="Digite o nome da nova raça...">
+            </div>
 
             <label>Status:</label>
-            <select name="status" id="status">
+            <select id="status" name="status" class="form-select" style="width: 200px;">
               <option value="disponivel" {% if animal.status == "disponivel" %}selected{% endif %}>Disponível</option>
               <option value="em_tratamento" {% if animal.status == "em_tratamento" %}selected{% endif %}>Em tratamento</option>
               <option value="adotado" {% if animal.status == "adotado" %}selected{% endif %}>Adotado</option>
@@ -97,6 +109,51 @@
       </form>
     </div>
   </div>
+
+  <script>
+    // Mostrar campo "nova raça" se selecionado
+    function handleRacaChange(select) {
+      const novaRacaDiv = document.getElementById("novaRacaDiv");
+      if (select.value === "nova") {
+        novaRacaDiv.style.display = "block";
+      } else {
+        novaRacaDiv.style.display = "none";
+        document.getElementById("novaRacaInput").value = "";
+      }
+    }
+
+    // Atualiza raças dinamicamente conforme a espécie selecionada
+    document.getElementById("especieSelect").addEventListener("change", function() {
+      const especieId = this.value;
+      const racaSelect = document.getElementById("racaSelect");
+
+      racaSelect.innerHTML = '<option value="">Carregando...</option>';
+
+      if (especieId) {
+        fetch(`/racas/${especieId}/`)
+          .then(response => response.json())
+          .then(data => {
+            racaSelect.innerHTML = '<option value="">Selecione</option>';
+            data.forEach(raca => {
+              const option = document.createElement("option");
+              option.value = raca.id;
+              option.textContent = raca.nome;
+              racaSelect.appendChild(option);
+            });
+            // Adiciona novamente a opção de nova raça
+            const novaOption = document.createElement("option");
+            novaOption.value = "nova";
+            novaOption.textContent = "➕ Adicionar nova raça";
+            racaSelect.appendChild(novaOption);
+          })
+          .catch(() => {
+            racaSelect.innerHTML = '<option value="">Erro ao carregar raças</option>';
+          });
+      } else {
+        racaSelect.innerHTML = '<option value="">Selecione uma espécie primeiro...</option>';
+      }
+    });
+  </script>
 
 </body>
 </html>

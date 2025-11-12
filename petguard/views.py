@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Animal, Especie
+from .models import Animal, Especie, Raca
 
 
 def login_view(request):
@@ -38,17 +38,27 @@ def add_animal(request, id=None):
         animal = get_object_or_404(Animal, id=id)
 
     especies = Especie.objects.all()
+    racas = Raca.objects.all()
 
     if request.method == 'POST':
         anos = request.POST.get('anos')
         meses = request.POST.get('meses')
         apelido = request.POST.get('apelido')
         especie_id = request.POST.get('especie')
-        raca = request.POST.get('raca')
+        raca_id = request.POST.get('raca')
+        nova_raca_nome = request.POST.get('nova_raca')
         status = request.POST.get('status')
         observacoes = request.POST.get('observacoes')
 
         especie = get_object_or_404(Especie, id=especie_id)
+
+        # Se for criada uma nova raça
+        if nova_raca_nome:
+            raca, _ = Raca.objects.get_or_create(nome=nova_raca_nome, especie=especie)
+        elif raca_id:
+            raca = get_object_or_404(Raca, id=raca_id)
+        else:
+            raca = None
 
         if animal:
             animal.anos = anos
@@ -69,6 +79,7 @@ def add_animal(request, id=None):
                 status=status,
                 observacoes=observacoes,
             )
+
         return redirect('index')
 
     anos = range(0, 11)
@@ -79,8 +90,12 @@ def add_animal(request, id=None):
         'anos': anos,
         'meses': meses,
         'especies': especies,
+        'racas': racas,
     })
 
+def racas_por_especie(request, especie_id):
+    racas = Raca.objects.filter(especie_id=especie_id).values('id', 'nome')
+    return JsonResponse(list(racas), safe=False)
 
 @login_required(login_url="login")
 def detalhes(request, id):

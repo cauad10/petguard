@@ -148,5 +148,25 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const profileIcon = document.getElementById("profileIcon");
+  const profileMenu = document.getElementById("profileMenu");
+
+  if (profileIcon && profileMenu) {
+    profileIcon.addEventListener("click", function (e) {
+      e.stopPropagation();
+      profileMenu.classList.toggle("show");
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!profileMenu.contains(e.target) && !profileIcon.contains(e.target)) {
+        profileMenu.classList.remove("show");
+      }
+    });
+  }
+});
+</script>
+
 </body>
 </html>
