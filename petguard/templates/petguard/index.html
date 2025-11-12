@@ -35,7 +35,7 @@
     <select id="filtroEspecie">
       <option value="">Todas as espécies</option>
       {% for especie in especies %}
-      <option value="{{ especie.nome }}">{{ especie.nome }}</option>
+      <option value="{{ especie.id }}">{{ especie.nome }}</option>
       {% endfor %}
     </select>
 
@@ -72,7 +72,7 @@
     {% for animal in animais %}
     <tr 
        data-especie="{{ animal.especie.id }}" 
-       data-raca="{{ animal.raca.id }}" 
+       data-raca="{{ animal.raca.id }}"
        data-status="{{ animal.status }}">
       <td>{{ animal.apelido }}</td>
       <td>{{ animal.especie }}</td>
@@ -132,24 +132,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function aplicarFiltros() {
     const termo = normalizarTexto(buscaInput.value);
-    const especie = normalizarTexto(filtroEspecie.value);
+    const especie = filtroEspecie.value;
     const raca = filtroRaca.value;
     const status = normalizarStatus(statusInput.value);
 
     linhas.forEach(linha => {
-      const apelido = normalizarTexto(linha.cells[0].textContent);
-      const linhaEspecie = normalizarTexto(linha.dataset.especie || "");
-      const linhaRaca = linha.dataset.raca;
-      const linhaStatus = normalizarStatus(linha.dataset.status || "");
+        const apelido = normalizarTexto(linha.cells[0].textContent);
+        const linhaEspecie = linha.dataset.especie;
+        const linhaRaca = linha.dataset.raca;
+        const linhaStatus = normalizarStatus(linha.dataset.status || "");
 
-      const matchApelido = !termo || apelido.includes(termo);
-      const matchEspecie = !especie || linhaEspecie === especie;
-      const matchRaca = !raca || linhaRaca === raca;
-      const matchStatus = !status || linhaStatus === status;
+        const matchApelido = !termo || apelido.includes(termo);
+        const matchEspecie = !especie || linhaEspecie === especie;
+        const matchRaca = !raca || linhaRaca === raca;
+        const matchStatus = !status || linhaStatus === status;
 
-      linha.style.display = (matchApelido && matchEspecie && matchRaca && matchStatus) ? "" : "none";
+        linha.style.display = (matchApelido && matchEspecie && matchRaca && matchStatus) ? "" : "none";
     });
-  }
+    }
+
 
   [buscaInput, filtroEspecie, filtroRaca].forEach(el => {
     el.addEventListener("input", aplicarFiltros);
