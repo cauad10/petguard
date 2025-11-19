@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <title>Meu Perfil</title>
   <link rel="stylesheet" href="{% static 'petguard/perfil.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
   <div class="profile-card">
     <div class="profile-header">
       <div class="avatar">
@@ -16,9 +18,9 @@
       <div class="profile-type">
         {% if user.is_superuser %}
           Administrador
-        {% elif user.groups.all.0.name == 'Operadores' %}
+        {% elif user.groups.all.0.name == 'Operador' %}
           Operador
-        {% elif user.groups.all.0.name == 'Veterinarios' %}
+        {% elif user.groups.all.0.name == 'Veterinario' %}
           Veterinário
         {% else %}
           Membro
@@ -26,7 +28,7 @@
       </div>
     </div>
 
-    <form method="POST">
+    <form id="perfilForm">
       {% csrf_token %}
       <label for="first_name">Nome</label>
       <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">
@@ -44,5 +46,34 @@
       <a href="{% url 'index' %}">⬅️ Voltar ao início</a>
     </div>
   </div>
+
+  <script>
+    document.getElementById("perfilForm").addEventListener("submit", async function(e) {
+      e.preventDefault(); // impede reload
+
+      const form = this;
+      const formData = new FormData(form);
+
+      const response = await fetch("", {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Sucesso!",
+          text: data.message,
+          confirmButtonText: "OK"
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>

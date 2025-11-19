@@ -12,4 +12,7 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('veterinario/<int:animal_id>/', views.veterinario_view, name='veterinario'),
     path('racas/<int:especie_id>/', views.racas_por_especie, name='racas_por_especie'),
+    path('animal/<int:animal_id>/', views.veterinario_view, name='veterinario'),
+    path('medicacao/<int:pk>/deletar/', views.deletar_medicacao, name='deletar_medicacao'),
+    path('editar_medicacao/<int:medicacao_id>/', views.editar_medicacao, name='editar_medicacao'),
 ]

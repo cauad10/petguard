@@ -1,0 +1,95 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if medicacao %}Editar Medicação{% else %}Adicionar Medicação{% endif %}</title>
+    <link rel="stylesheet" href="{% static 'petguard/veterinario.css' %}">
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-left">
+        <img src="{% static 'petguard/petlogobranco.png' %}" alt="Logo PETGUARD">
+    </div>
+    <div class="header-right">
+        <img src="{% static 'petguard/iconepng.png' %}" alt="Usuário">
+    </div>
+</header>
+
+<div class="container">
+
+    <h2 style="color:#015d2e;">
+        {% if medicacao %}
+            ✏️ Editar Medicação
+        {% else %}
+            ➕ Adicionar Nova Medicação
+        {% endif %}
+    </h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Nome da medicação:</label>
+        <input 
+            type="text" 
+            name="nome" 
+            required 
+            value="{% if medicacao %}{{ medicacao.nome }}{% endif %}"
+        >
+
+        <label>Observações:</label>
+        <textarea name="observacoes" rows="3">{% if medicacao %}{{ medicacao.observacoes }}{% endif %}</textarea>
+
+        <button type="submit">
+            {% if medicacao %}Salvar Alterações{% else %}Salvar Medicação{% endif %}
+        </button>
+    </form>
+
+    <br>
+
+    {% if medicacao %}
+        <!-- Botão que abre modal -->
+        <a href="#" class="btn-excluir" onclick="abrirModal('{% url 'deletar_medicacao' medicacao.id %}')">
+            🗑️ Excluir Medicação
+        </a>
+    {% endif %}
+
+    <br><br>
+
+    <a href="{% url 'veterinario' animal.id %}" class="back-btn">⬅️ Voltar</a>
+
+
+</div>
+
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+        <h3>Tem certeza que deseja excluir?</h3>
+        <p>Esta ação não pode ser desfeita.</p>
+
+        <button class="confirm" id="btnConfirmar">Excluir</button>
+        <button class="cancel" onclick="fecharModal()">Cancelar</button>
+    </div>
+</div>
+
+<script>
+    let urlExcluir = "";
+
+    function abrirModal(url) {
+        urlExcluir = url;
+        document.getElementById("modalOverlay").style.display = "flex";
+    }
+
+    function fecharModal() {
+        document.getElementById("modalOverlay").style.display = "none";
+    }
+
+    document.getElementById("btnConfirmar").onclick = function () {
+        window.location.href = urlExcluir;
+    };
+</script>
+
+</body>
+</html>

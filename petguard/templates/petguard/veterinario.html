@@ -6,17 +6,24 @@
   <title>Ficha Veterinária - {{ animal.apelido }}</title>
   <link rel="stylesheet" href="{% static 'petguard/veterinario.css' %}">
 </head>
+
 <body>
+
+  <!-- CABEÇALHO -->
   <header class="header">
     <div class="header-left">
       <img src="{% static 'petguard/petlogobranco.png' %}" alt="Logo PETGUARD">
     </div>
+
     <div class="header-right">
       <img src="{% static 'petguard/iconepng.png' %}" alt="Usuário">
     </div>
   </header>
 
+  <!-- CONTEÚDO -->
   <div class="container">
+
+    <!-- DADOS DO ANIMAL -->
     <div class="animal-header">
       {% if animal.foto %}
         <img src="{{ animal.foto.url }}" alt="Foto de {{ animal.apelido }}">
@@ -34,19 +41,33 @@
       </div>
     </div>
 
+    <!-- MEDICAÇÕES -->
     <div class="medicacoes">
       <h3>💊 Medicações Registradas</h3>
+
       {% if medicacoes %}
         <ul>
           {% for m in medicacoes %}
             <li>
-              <strong>{{ m.nome }}</strong> — {{ m.data_aplicacao|date:"d/m/Y" }}
-              {% if m.observacoes %}
-                <br><small><em>{{ m.observacoes }}</em></small>
-              {% endif %}
+              <div>
+                <strong>{{ m.nome }}</strong> — {{ m.data_aplicacao|date:"d/m/Y" }}
+                {% if m.observacoes %}
+                  <br><small><em>{{ m.observacoes }}</em></small>
+                {% endif %}
+              </div>
+
+              <div class="btn-group">
+                <a href="{% url 'editar_medicacao' m.id %}" class="btn-editar">✏️ Editar</a>
+
+                <a href="#" 
+                   class="btn-excluir"
+                   data-url="{% url 'deletar_medicacao' m.id %}"
+                   onclick="abrirModal(this.dataset.url)">🗑️ Excluir</a>
+              </div>
             </li>
           {% endfor %}
         </ul>
+
       {% else %}
         <p>Nenhuma medicação registrada.</p>
       {% endif %}
@@ -56,8 +77,9 @@
       <h3>➕ Adicionar Nova Medicação</h3>
       <form method="POST">
         {% csrf_token %}
+
         <label for="nome">Nome da medicação:</label>
-        <input type="text" id="nome" name="nome" placeholder="Ex: Antibiótico XYZ" required>
+        <input type="text" id="nome" name="nome" required placeholder="Ex: Antibiótico XYZ">
 
         <label for="observacoes">Observações:</label>
         <textarea id="observacoes" name="observacoes" rows="3" placeholder="Ex: Administrar 2x ao dia..."></textarea>
@@ -68,5 +90,33 @@
 
     <a href="{% url 'index' %}" class="back-btn">⬅️ Voltar</a>
   </div>
+
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal">
+      <h3>Excluir Medicação</h3>
+      <p>Tem certeza que deseja excluir esta medicação?</p>
+
+      <button id="confirm-delete" class="confirm">Sim, excluir</button>
+      <button id="cancel-delete" class="cancel">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    let deleteUrl = "";
+
+    function abrirModal(url) {
+      deleteUrl = url;
+      document.getElementById("modal-overlay").style.display = "flex";
+    }
+
+    document.getElementById("cancel-delete").onclick = function() {
+      document.getElementById("modal-overlay").style.display = "none";
+    };
+
+    document.getElementById("confirm-delete").onclick = function() {
+      window.location.href = deleteUrl;
+    };
+  </script>
+
 </body>
 </html>

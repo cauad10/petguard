@@ -6,6 +6,8 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from .models import Animal, Especie, Raca, Medicacao
+from django.contrib.auth import update_session_auth_hash
+
 
 def login_view(request):
     if request.method == "POST":
@@ -152,21 +154,22 @@ def excluir_animal(request, animal_id):
 def perfil(request):
     user = request.user
 
-    if request.method == "POST":
-        nome = request.POST.get("name")
-        telefone = request.POST.get("phone")
+    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        nome = request.POST.get("first_name")
         email = request.POST.get("email")
+        senha = request.POST.get("password")
 
         user.first_name = nome
         user.email = email
-        user.save()
 
-        if hasattr(user, "profile"):
-            user.profile.telefone = telefone
-            user.profile.save()
+        if senha:
+            user.set_password(senha)
+            user.save()
+            update_session_auth_hash(request, user)
+        else:
+            user.save()
 
-        messages.success(request, "Perfil atualizado com sucesso!")
-        return redirect("index")
+        return JsonResponse({"success": True, "message": "Perfil atualizado com sucesso!"})
 
     return render(request, "petguard/perfil.html", {"user": user})
 
@@ -201,4 +204,43 @@ def veterinario_view(request, animal_id):
     return render(request, 'petguard/veterinario.html', {
         'animal': animal,
         'medicacoes': medicacoes,
+    })
+
+def criar_medicacao(request, animal_id):
+    animal = get_object_or_404(Animal, id=animal_id)
+
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        observacoes = request.POST.get("observacoes")
+
+        Medicacao.objects.create(
+            animal=animal,
+            nome=nome,
+            observacoes=observacoes
+        )
+        return redirect("veterinario", animal_id=animal.id)
+
+    return render(request, "medicacao_form.html", {
+        "animal": animal
+    })
+
+def deletar_medicacao(request, pk):
+    medicacao = get_object_or_404(Medicacao, pk=pk)
+    animal_id = medicacao.animal.id
+    medicacao.delete()
+    return redirect('veterinario', animal_id=animal_id)
+
+def editar_medicacao(request, medicacao_id):
+    medicacao = get_object_or_404(Medicacao, id=medicacao_id)
+    animal = medicacao.animal
+
+    if request.method == "POST":
+        medicacao.nome = request.POST.get("nome")
+        medicacao.observacoes = request.POST.get("observacoes")
+        medicacao.save()
+        return redirect("veterinario", animal_id=animal.id)
+
+    return render(request, "petguard/medicacao_form.html", {
+        "medicacao": medicacao,
+        "animal": animal
     })
